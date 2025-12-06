@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wells Fargo - Dashboard (Demo)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+  --wf-red:#C8102E;
+  --wf-yellow:#FFD400;
+  --page-bg:#f3f4f6;
+  --muted:#9aa0a6;
+  --card-bg:#fff;
+  --shadow:0 6px 18px rgba(0,0,0,0.08);
+  --radius:12px;
+  --notif-bg: #ffffff;
+}
+
+/* Basic layout & reset */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;font-family: "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;background:var(--page-bg);color:#222;
+}
+
+/* Topbar */
+.topbar{
+  background:var(--wf-red);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:60;
+}
+.left{display:flex;align-items:center;gap:12px;flex:1}
+.avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.08)}
+.brand{font-weight:700;font-size:18px;letter-spacing:0.6px}
+.menu-btn{margin-left:auto;width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:transparent;color:#fff;border:none;font-size:18px}
+.thin-yellow{height:4px;background:var(--wf-yellow);width:100%}
+
+/* Container */
+.container{max-width:420px;margin:0 auto;padding:14px}
+.subtitle{text-align:center;font-size:18px;color:#333;margin:12px 0 8px;font-weight:600}
+
+/* Pages */
+.page{display:none}
+.page.active{display:block}
+
+/* Account Card */
+.account-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;position:relative;overflow:hidden}
+.account-row{display:flex;align-items:center;justify-content:space-between}
+.acct-left{font-size:14px;color:var(--muted);font-weight:700}
+.acct-sub{color:#777;font-size:13px;margin-top:4px}
+.balance{text-align:right}
+.balance .amount{font-size:26px;font-weight:800;color:#0b0b0b}
+.balance .available{font-size:12px;color:var(--muted);margin-top:4px}
+.three-dots{position:absolute;right:8px;top:12px;display:flex;flex-direction:column;gap:4px;align-items:center;opacity:0.6}
+.dot{width:6px;height:6px;border-radius:50%;background:#c6c6c6}
+
+/* Promo */
+.promo-line{background:linear-gradient(90deg,#f7fbff,#ffffff);padding:10px;margin:12px 0;border-radius:10px;display:flex;gap:10px;align-items:center;font-size:13px;color:#1166a2;box-shadow:0 2px 6px rgba(0,0,0,0.03)}
+.promo-line img{width:28px;height:28px}
+
+/* Icon row */
+.icon-row{display:flex;gap:8px;margin-bottom:12px}
+.icon-item{flex:1;background:#fff;border-radius:10px;padding:12px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.03);font-size:13px;cursor:pointer}
+.icon-item i{font-size:18px;display:block;margin-bottom:8px;color:#333}
+
+/* FICO */
+.fico{background:#ececec;padding:12px;border-radius:10px;text-align:center;color:#222;margin-bottom:12px;font-size:14px}
+
+/* Carousel */
+.carousel{border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.slide{padding:28px 18px;min-height:180px;color:#fff;display:none;position:relative}
+.slide.active{display:block}
+.slide .icon{font-size:34px;margin-bottom:12px;opacity:0.95}
+.slide h3{margin:0 0 8px 0;font-weight:700;font-size:20px}
+.slide p{margin:0 0 18px 0;opacity:0.95}
+.slide .cta{display:inline-block;padding:10px 18px;border-radius:6px;background:rgba(255,255,255,0.12);color:#fff;font-weight:700;text-decoration:none}
+.slide.purple{background:linear-gradient(180deg,#673ab7,#6f3aa0)}
+.carousel-controls{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f7f7f7;gap:10px}
+.dots{display:flex;gap:8px;align-items:center;margin-left:auto}
+.dot-btn{width:8px;height:8px;border-radius:50%;background:#cfcfcf;opacity:0.9}
+.dot-btn.active{background:#7a6a9a}
+.ctrl-btn{background:transparent;border:none;font-size:20px;padding:6px;color:#444}
+
+/* Disclosures */
+.disclosures{margin:14px 0 70px;background:#fff;padding:14px;border-radius:10px;font-size:13px;color:#444;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+
+/* Transactions list */
+.tx-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:12px}
+.tx-card table{width:100%;border-collapse:collapse;font-size:13px}
+.tx-card th, .tx-card td{padding:6px;text-align:left;border-bottom:1px solid #f0f0f0}
+.tx-card th{font-weight:700;background:#fafafa;}
+
+/* Forms / pages */
+.form-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-bottom:12px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;color:#333;margin-bottom:6px}
+.field input, .field textarea, .field select{
+  width:100%;padding:10px;border-radius:8px;border:1px solid #e0e0e0;font-size:14px
+}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;border:none;background:var(--wf-red);color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--wf-red);border:1px solid rgba(200,16,30,0.08)}
+
+/* Side menu */
+.side-menu{position:fixed;right:-360px;top:0;width:360px;max-width:92%;height:100%;background:#fff;z-index:120;box-shadow:-8px 0 24px rgba(0,0,0,0.12);transition:right .28s ease;border-left:1px solid #f0f0f0;padding:18px}
+.side-menu.open{right:0}
+.side-menu h4{margin:0 0 12px 0}
+.menu-list{list-style:none;padding:0;margin:0}
+.menu-list li{padding:12px 8px;border-radius:8px;cursor:pointer;color:#222}
+.menu-list li:hover{background:#f7f7f7}
+.menu-close{position:absolute;left:10px;top:10px;border:none;background:transparent;font-size:18px;cursor:pointer}
+
+/* The overlay that covers the page when the menu is open */
+#menuOverlay{
+  display:none;
+  position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.35);z-index:110;
+}
+
+/* Centered notification modal (overlay card) */
+#notifWrap{
+  display:none;
+  position:fixed;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(1.02);
+  z-index:2000;
+  min-width:260px;
+  max-width:92%;
+  border-radius:12px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.25);
+  background:var(--notif-bg);
+  overflow:hidden;
+  animation:popIn .18s ease forwards;
+}
+
+/* individual content */
+.notif-inner{padding:18px 18px 14px 18px; text-align:left}
+.notif-title{display:flex;align-items:center;gap:12px;font-weight:800;font-size:16px;margin-bottom:6px}
+.notif-msg{font-size:14px;color:#333;line-height:1.3;margin-bottom:6px}
+.notif-close{position:absolute;right:10px;top:8px;border:none;background:transparent;font-size:16px;cursor:pointer;color:#666}
+
+/* success / error colors */
+.notif-success .notif-title i{color:#1a9a35}
+.notif-error .notif-title i{color:#d23333}
+.notif-info .notif-title i{color:#1166a2}
+
+/* small icon styling */
+.notif-icon{
+  width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;background:#f4f4f4;
+}
+
+/* show/hide animation */
+@keyframes popIn {
+  from {opacity:0; transform:translate(-50%,-50%) scale(.98)}
+  to   {opacity:1; transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes popOut {
+  from {opacity:1; transform:translate(-50%,-50%) scale(1)}
+  to   {opacity:0; transform:translate(-50%,-50%) scale(.98)}
+}
+
+/* Responsive tweaks */
+@media (max-width:440px){
+  .container{padding:12px}
+  .balance .amount{font-size:22px}
+  .slide{min-height:160px;padding:22px}
+  .side-menu{width:92%}
+  #notifWrap{min-width:220px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================
+        BODY CONTENT
+============================ -->
+<!-- HEADER -->
+<div class="topbar" role="banner">
+  <div class="left">
+    <div class="avatar" aria-hidden="true"><i class="fas fa-user" style="font-size:16px;"></i></div>
+    <div style="display:flex;flex-direction:column;">
+      <div style="font-size:12px;opacity:0.95">Account Summary</div>
+      <div class="brand">WELLS FARGO</div>
+    </div>
+  </div>
+  <button id="menuBtn" class="menu-btn" aria-label="menu"><i class="fas fa-bars"></i></button>
+</div>
+<div class="thin-yellow" aria-hidden="true"></div>
+
+<div class="container" role="main">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active" aria-label="dashboard">
+  <!-- ...your dashboard HTML (account card, icons, carousel, transactions) ... -->
+</section>
+
+<!-- SEND MONEY -->
+<section id="sendPage" class="page" aria-label="send money page">
+  <!-- ...send form ... -->
+</section>
+
+<!-- DEPOSIT -->
+<section id="depositPage" class="page" aria-label="deposit page">
+  <!-- ...deposit form ... -->
+</section>
+
+<!-- CARD REQUEST -->
+<section id="cardPage" class="page" aria-label="card request page">
+  <!-- ...card request form ... -->
+</section>
+
+<div class="spacer" aria-hidden="true"></div>
+</div>
+
+<!-- MENU & NOTIFICATIONS -->
+<div id="menuOverlay" aria-hidden="true"></div>
+<aside id="sideMenu" class="side-menu" aria-hidden="true" role="dialog" aria-label="Main menu">
+  <!-- ...side menu HTML ... -->
+</aside>
+
+<div id="notifWrap" aria-live="polite" role="status">
+  <button class="notif-close" aria-label="Close notification" onclick="hideNotification()">✕</button>
+  <div class="notif-inner" id="notifInner"></div>
+</div>
+
+<!-- ============================
+        JAVASCRIPT
+============================ -->
+<script>
+/* ----------------------
+   DATA & STORE
+---------------------- */
+const STORAGE_KEY = 'wellsGoDemo_v1';
+let store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { balance:12413.62, transactions:[], cardRequests:[] };
+saveStore();
+function saveStore(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
+
+/* ----------------------
+   UI & BALANCE
+---------------------- */
+const balanceEl = document.getElementById('balanceAmount');
+const txBody = document.getElementById('txBody');
+function formatMoney(n){ return '$' + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function renderStore(){
+  balanceEl.textContent = formatMoney(store.balance);
+  txBody.innerHTML = '';
+  const txs = (store.transactions||[]).slice().reverse();
+  if(!txs.length){ txBody.innerHTML='<tr><td colspan="4" style="color:#999">No recent transactions</td></tr>'; return; }
+  txs.forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="white-space:nowrap">${t.date}</td><td>${t.type}</td><td>${t.desc}</td><td style="text-align:right">${formatMoney(t.amount)}</td>`;
+    txBody.appendChild(tr);
+  });
+}
+
+/* ----------------------
+   NAVIGATION
+---------------------- */
+function navigateTo(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(pageId);
+  if(el) el.classList.add('active');
+  toggleMenu(true);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ----------------------
+   MENU
+---------------------- */
+const menuBtn = document.getElementById('menuBtn');
+const sideMenu = document.getElementById('sideMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+menuBtn.addEventListener('click', ()=> toggleMenu(false));
+menuOverlay.addEventListener('click', ()=> toggleMenu(true));
+function toggleMenu(closeOnly){
+  if(closeOnly){
+    sideMenu.classList.remove('open');
+    menuOverlay.style.display='none';
+    sideMenu.setAttribute('aria-hidden','true');
+    menuOverlay.setAttribute('aria-hidden','true');
+  } else {
+    sideMenu.classList.toggle('open');
+    const open = sideMenu.classList.contains('open');
+    menuOverlay.style.display = open ? 'block' : 'none';
+    sideMenu.setAttribute('aria-hidden',open?'false':'true');
+    menuOverlay.setAttribute('aria-hidden',open?'false':'true');
+  }
+}
+
+/* ----------------------
+   NOTIFICATIONS
+---------------------- */
+let notifTimer = null;
+function showNotification(type,title,message,timeoutMs=3000){
+  const wrap = document.getElementById('notifWrap');
+  const inner = document.getElementById('notifInner');
+  inner.innerHTML = `
+    <div class="notif-title"><span class="notif-icon">${type==='success'?'✓':type==='error'?'✕':'i'}</span><div>${title}</div></div>
+    <div class="notif-msg">${message}</div>`;
+  wrap.classList.remove('notif-success','notif-error','notif-info');
+  wrap.classList.add(type==='success'?'notif-success':type==='error'?'notif-error':'notif-info');
+  wrap.style.display='block';
+  wrap.style.animation='popIn .18s ease forwards';
+  if(notifTimer) clearTimeout(notifTimer);
+  notifTimer=setTimeout(hideNotification,timeoutMs);
+}
+function hideNotification(){ 
+  const wrap=document.getElementById('notifWrap');
+  wrap.style.animation='popOut .12s ease forwards';
+  if(notifTimer) clearTimeout(notifTimer);
+  setTimeout(()=>wrap.style.display='none',140);
+}
+
+/* ----------------------
+   ACTIONS
+---------------------- */
+function doSend(){
+  const name = document.getElementById('sendRecipient').value.trim();
+  const amt = parseFloat(document.getElementById('sendAmount').value);
+  const note = document.getElementById('sendNote').value.trim();
+  if(!name){ showNotification('error','Missing recipient','Please enter recipient name'); return; }
+  if(!amt||amt<=0){ showNotification('error','Invalid amount','Please enter an amount greater than 0'); return; }
+  if(amt>store.balance){ showNotification('error','Insufficient funds','You do not have enough balance (demo)'); return; }
+  store.balance-=(amt);
+  store.transactions.push({ date:new Date().toLocaleDateString(), type:'Send', desc:`To ${name}${note?' — '+note:''}`, amount:amt });
+  saveStore(); renderStore();
+  document.getElementById('sendRecipient').value=''; document.getElementById('sendAmount').value=''; document.getElementById('sendNote').value='';
+  showNotification('success','Success',`Sent ${formatMoney(amt)} to ${name}`,2800);
+  setTimeout(()=>navigateTo('dashboard'),900);
+}
+
+function doDeposit(){
+  const amt=parseFloat(document.getElementById('depositAmount').value);
+  if(!amt||amt<=0){ showNotification('error','Invalid amount','Please enter an amount greater than 0'); return; }
+  store.balance+=amt;
+  store.transactions.push({ date:new Date().toLocaleDateString(), type:'Deposit', desc:'Mobile deposit (demo)', amount:amt });
+  saveStore(); renderStore();
+  document.getElementById('depositAmount').value='';
+  showNotification('success','Success',`Deposited ${formatMoney(amt)}`,2800);
+  setTimeout(()=>navigateTo('dashboard'),900);
+}
+
+function requestCard(){
+  const fullName = document.getElementById('cardName').value.trim();
+  if(!fullName){ showNotification('error','Missing name','Please enter your full name'); return; }
+  store.cardRequests.push({ date:new Date().toLocaleDateString(), name: fullName });
+  saveStore();
+  document.getElementById('cardName').value='';
+  showNotification('success','Request submitted','Your card request has been recorded (demo).',2800);
+  setTimeout(()=>navigateTo('dashboard'),900);
+}
+
+/* ----------------------
+   INIT
+---------------------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderStore();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - Wells Go</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f4f6;display:flex;justify-content:center;align-items:center;height:100vh;margin:20px}
+.form-card{background:#fff;padding:34px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08);width:360px;max-width:90%}
+.field{margin-bottom:12px}
+.field label{display:block;margin-bottom:6px;color:#333;font-weight:600}
+.field input, .field select{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;font-size:14px}
+.btn{padding:10px 16px;background:#C8102E;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:#C8102E;border:1px solid #C8102E;margin-top:8px}
+.subtitle{text-align:center;font-size:18px;margin-bottom:16px;color:#222;font-weight:600}
+.dob-selects{display:flex;gap:5px}
+.dob-selects select{flex:1;}
+
+/* Notification styles */
+.notification{
+  position: fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  padding:16px 24px;
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+  font-weight:600;
+  display:none;
+  z-index:9999;
+}
+.notification.success{border-left:6px solid #28a745;color:#28a745;}
+.notification.error{border-left:6px solid #dc3545;color:#dc3545;}
+img {
+  width:300px;
+}
+</style>
+</head>
+<body>
+
+<div class="form-card">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR94ont3Z53Sp0ZF7lJ0SHymS0Zgglvtn77AOXpWqqYhxAnEQZ3jov38ZU&s=10">
+<br>
+  <div class="subtitle">Create Account</div>
+
+  <div class="field"><label for="regName">Full Name</label><input type="text" id="regName" placeholder="John Doe" /></div>
+  <div class="field"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="you@example.com" /></div>
+  <div class="field"><label for="regPhone">Phone</label><input type="tel" id="regPhone" placeholder="+1 555-123-4567" /></div>
+  <div class="field"><label for="regAddress">Address</label><input type="text" id="regAddress" placeholder="123 Main St" /></div>
+  <div class="field"><label for="regPassword">Password</label><input type="password" id="regPassword" placeholder="Password" /></div>
+  <div class="field"><label for="regPIN">PIN (4 digits)</label><input type="password" id="regPIN" placeholder="1234" maxlength="4" /></div>
+
+  <div class="field">
+    <label>Date of Birth</label>
+    <div class="dob-selects">
+      <select id="dobDay"></select>
+      <select id="dobMonth"></select>
+      <select id="dobYear"></select>
+    </div>
+  </div>
+
+  <div class="field"><label for="regPicture">Upload Picture</label><input type="file" id="regPicture" accept="image/*" /></div>
+
+  <button class="btn" onclick="doRegister()">Register</button>
+  <button class="btn ghost" onclick="window.location='login.html'">Back to Login</button>
+</div>
+
+<!-- Notification box -->
+<div id="notification" class="notification"></div>
+
+<script>
+const USERS_KEY = 'wellsGoUsers_v1';
+
+// Populate DOB dropdowns
+function populateDOB(){
+  const daySelect = document.getElementById('dobDay');
+  const monthSelect = document.getElementById('dobMonth');
+  const yearSelect = document.getElementById('dobYear');
+
+  for(let d=1; d<=31; d++){ daySelect.add(new Option(d,d)); }
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  monthNames.forEach((m,i)=> monthSelect.add(new Option(m,i+1)));
+  const currentYear = new Date().getFullYear();
+  for(let y=currentYear; y>=1900; y--){ yearSelect.add(new Option(y,y)); }
+}
+populateDOB();
+
+// Notification function
+function showNotification(message,type='success'){
+  const notif = document.getElementById('notification');
+  notif.innerText = message;
+  notif.className = 'notification ' + type;
+  notif.style.display = 'block';
+  setTimeout(()=>{ notif.style.display='none'; },3000);
+}
+
+function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
+function saveUsers(users){ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+
+function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const address = document.getElementById('regAddress').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const pin = document.getElementById('regPIN').value.trim();
+  const day = document.getElementById('dobDay').value;
+  const month = document.getElementById('dobMonth').value;
+  const year = document.getElementById('dobYear').value;
+  const pictureInput = document.getElementById('regPicture');
+
+  if(!name||!email||!phone||!address||!password||!pin||!day||!month||!year){
+    showNotification('Please fill out all fields','error'); return;
+  }
+
+  if(pin.length!==4 || isNaN(pin)){ showNotification('PIN must be 4 digits','error'); return; }
+
+  const users = getUsers();
+  if(users.find(u=>u.email.toLowerCase()===email.toLowerCase())){ showNotification('Email already exists','error'); return; }
+
+  if(pictureInput.files.length === 0){ showNotification('Please upload a picture','error'); return; }
+
+  const dob = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const pictureData = e.target.result;
+    const newUser = { name,email,phone,address,password,pin,dob,picture:pictureData,balance:12413.62,transactions:[] };
+    users.push(newUser);
+    saveUsers(users);
+    localStorage.setItem('wellsGoCurrentUser', JSON.stringify(newUser));
+    showNotification('Account created successfully!','success');
+    setTimeout(()=>{ window.location='dashboard.html'; },1500);
+  };
+  reader.readAsDataURL(pictureInput.files[0]);
+}
+</script>
+</body>
+</html>

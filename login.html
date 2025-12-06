@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Wells Go</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f4f6;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.form-card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08);width:360px;max-width:90%}
+.field{margin-bottom:12px}
+.field label{display:block;margin-bottom:6px;color:#333;font-weight:600}
+.field input{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;font-size:14px}
+.btn{padding:10px 16px;background:#C8102E;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:#C8102E;border:1px solid #C8102E;margin-top:8px}
+.subtitle{text-align:center;font-size:18px;margin-bottom:16px;color:#222;font-weight:600}
+/* Notification styles */
+.notification{
+  position: fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  padding:16px 24px;
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+  font-weight:600;
+  display:none;
+  z-index:9999;
+}
+.notification.success{border-left:6px solid #28a745;color:#28a745;}
+.notification.error{border-left:6px solid #dc3545;color:#dc3545;}
+img {
+  width:250px;
+}
+</style>
+</head>
+<body>
+<div class="form-card">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR94ont3Z53Sp0ZF7lJ0SHymS0Zgglvtn77AOXpWqqYhxAnEQZ3jov38ZU&s=10">
+  <div class="subtitle">Welcome Back</div>
+  <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" placeholder="you@example.com" /></div>
+  <div class="field"><label for="loginPassword">Password</label><input type="password" id="loginPassword" placeholder="Password" /></div>
+  <button class="btn" onclick="doLogin()">Login</button>
+  <button class="btn ghost" onclick="window.location='register.html'">Create Account</button>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<script>
+const USERS_KEY = 'wellsGoUsers_v1';
+function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
+
+function showNotification(message,type='success'){
+  const notif = document.getElementById('notification');
+  notif.innerText = message;
+  notif.className = 'notification ' + type;
+  notif.style.display = 'block';
+  setTimeout(()=>{ notif.style.display='none'; },3000);
+}
+
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if(!email || !password){ showNotification('Please enter both email and password','error'); return; }
+
+  const users = getUsers();
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+
+  if(!user){ showNotification('Invalid email or password','error'); return; }
+
+  localStorage.setItem('wellsGoCurrentUser', JSON.stringify(user));
+  showNotification('Login successful!','success');
+  setTimeout(()=>{ window.location='dashboard.html'; },1000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wells Fargo - Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+  --wf-red:#C8102E;
+  --wf-yellow:#FFD400;
+  --page-bg:#f3f4f6;
+  --muted:#9aa0a6;
+  --card-bg:#fff;
+  --shadow:0 6px 18px rgba(0,0,0,0.08);
+  --radius:12px;
+  --notif-bg: #ffffff;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family: "Helvetica Neue", Arial, sans-serif;-webkit-font-smoothing:antialiased;background:var(--page-bg);color:#222}
+.topbar{background:var(--wf-red);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:60}
+.left{display:flex;align-items:center;gap:12px;flex:1}
+.avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.08)}
+.brand{font-weight:700;font-size:18px;letter-spacing:0.6px}
+.menu-btn{margin-left:auto;width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:transparent;color:#fff;border:none;font-size:18px}
+.thin-yellow{height:4px;background:var(--wf-yellow);width:100%}
+.container{max-width:420px;margin:0 auto;padding:14px}
+.subtitle{text-align:center;font-size:18px;color:#333;margin:12px 0 8px;font-weight:600}
+.page{display:none}
+.page.active{display:block}
+.account-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;position:relative;overflow:hidden}
+.account-row{display:flex;align-items:center;justify-content:space-between}
+.acct-left{font-size:14px;color:var(--muted);font-weight:700}
+.acct-sub{color:#777;font-size:13px;margin-top:4px}
+.balance{text-align:right}
+.balance .amount{font-size:26px;font-weight:800;color:#0b0b0b}
+.balance .available{font-size:12px;color:var(--muted);margin-top:4px}
+.three-dots{position:absolute;right:8px;top:12px;display:flex;flex-direction:column;gap:4px;align-items:center;opacity:0.6}
+.dot{width:6px;height:6px;border-radius:50%;background:#c6c6c6}
+.icon-row{display:flex;gap:8px;margin-bottom:12px}
+.icon-item{flex:1;background:#fff;border-radius:10px;padding:12px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.03);font-size:13px;cursor:pointer}
+.icon-item i{font-size:18px;display:block;margin-bottom:8px;color:#333}
+.fico{background:#ececec;padding:12px;border-radius:10px;text-align:center;color:#222;margin-bottom:12px;font-size:14px}
+.carousel{border-radius:0 0 12px 12px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.slide{padding:28px 18px;min-height:180px;color:#fff;display:none;position:relative}
+.slide.active{display:block}
+.slide .icon{font-size:34px;margin-bottom:12px;opacity:0.95}
+.slide h3{margin:0 0 8px 0;font-weight:700;font-size:20px}
+.slide p{margin:0 0 18px 0;opacity:0.95}
+.slide .cta{display:inline-block;padding:10px 18px;border-radius:6px;background:rgba(255,255,255,0.12);color:#fff;font-weight:700;text-decoration:none}
+.slide.purple{background:linear-gradient(180deg,#673ab7,#6f3aa0)}
+.carousel-controls{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:10px;background:#f7f7f7}
+.dots{display:flex;gap:8px;align-items:center;margin-left:auto}
+.dot-btn{width:8px;height:8px;border-radius:50%;background:#cfcfcf;opacity:0.9}
+.dot-btn.active{background:#7a6a9a}
+.ctrl-btn{background:transparent;border:none;font-size:20px;padding:6px;color:#444}
+.tx-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:12px}
+.tx-card table{width:100%;border-collapse:collapse;font-size:13px}
+.tx-card th, .tx-card td{padding:6px;text-align:left;border-bottom:1px solid #f0f0f0}
+.tx-card th{font-weight:700;background:#fafafa;}
+.form-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-bottom:12px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;color:#333;margin-bottom:6px}
+.field input, .field textarea, .field select{width:100%;padding:10px;border-radius:8px;border:1px solid #e0e0e0;font-size:14px}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;border:none;background:var(--wf-red);color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--wf-red);border:1px solid rgba(200,16,30,0.08)}
+.side-menu{position:fixed;right:-100%;top:0;width:360px;max-width:92%;height:100%;background:#fff;z-index:120;box-shadow:-8px 0 24px rgba(0,0,0,0.12);transition:right .28s ease;border-left:1px solid #f0f0f0;padding:18px}
+.side-menu.open{right:0}
+.side-menu h4{margin:0 0 12px 0}
+.menu-list{list-style:none;padding:0;margin:0}
+.menu-list li{padding:12px 8px;border-radius:8px;cursor:pointer;color:#222}
+.menu-list li:hover{background:#f7f7f7}
+.menu-close{position:absolute;left:10px;top:10px;border:none;background:transparent;font-size:18px;cursor:pointer}
+#menuOverlay{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.35);z-index:110;}
+#notifWrap{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(1.02);z-index:2000;min-width:260px;max-width:92%;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,0.25);background:var(--notif-bg);overflow:hidden;animation:popIn .18s ease forwards;}
+.notif-inner{padding:18px 18px 14px 18px;text-align:left}
+.notif-title{display:flex;align-items:center;gap:12px;font-weight:800;font-size:16px;margin-bottom:6px}
+.notif-msg{font-size:14px;color:#333;line-height:1.3;margin-bottom:6px}
+.notif-close{position:absolute;right:10px;top:8px;border:none;background:transparent;font-size:16px;cursor:pointer;color:#666}
+.notif-success .notif-title i{color:#1a9a35}
+.notif-error .notif-title i{color:#d23333}
+.notif-info .notif-title i{color:#1166a2}
+.notif-icon{width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;background:#f4f4f4;}
+@keyframes popIn {from {opacity:0; transform:translate(-50%,-50%) scale(.98)} to {opacity:1; transform:translate(-50%,-50%) scale(1)}}
+@keyframes popOut {from {opacity:1; transform:translate(-50%,-50%) scale(1)} to {opacity:0; transform:translate(-50%,-50%) scale(.98)}}
+@media (max-width:440px){.container{padding:12px}.balance .amount{font-size:22px}.slide{min-height:160px;padding:22px}.side-menu{width:92%}#notifWrap{min-width:300px; min-height:200px; padding:20%;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="topbar">
+  <div class="left">
+    <div class="avatar"><i class="fas fa-user" style="font-size:16px;"></i></div>
+    <div style="display:flex;flex-direction:column;">
+      <div style="font-size:12px;opacity:0.95">Account Summary</div>
+      <div class="brand">WELLS FARGO</div>
+    </div>
+  </div>
+  <button id="menuBtn" class="menu-btn"><i class="fas fa-bars"></i></button>
+</div>
+
+<div class="thin-yellow"></div>
+<div class="container">
+
+  <section id="dashboard" class="page active">
+    <div class="subtitle">Account Summary</div>
+
+    <div class="account-card">
+      <div class="account-row">
+        <div>
+          <div class="acct-left">EVERYDAY CHECKING</div>
+          <div class="acct-sub" id="acctNumber">...0000</div>
+        </div>
+
+        <div class="balance">
+          <div class="amount" id="balanceAmount">$0.00</div>
+          <div class="available">Available balance</div>
+        </div>
+      </div>
+      <div class="three-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <div class="icon-row">
+      <div class="icon-item" id="iconATM"><i class="fas fa-credit-card"></i><div>Card-Free ATM</div></div>
+      <div class="icon-item" id="iconSend"><i class="fas fa-paper-plane"></i><div>Send Money</div></div>
+      <div class="icon-item" id="iconDeposit"><i class="fas fa-file-invoice-dollar"></i><div>Deposit</div></div>
+    </div>
+
+    <div class="fico">View Your FICO® Credit Score &nbsp;<i class="fas fa-chevron-right" style="opacity:0.6"></i></div>
+      <div class="carousel" aria-roledescription="carousel">
+        <div class="slide purple active" data-slide="0" role="group" aria-label="slide 1 of 2">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div class="icon">🎓</div>
+            <h3>Paying for college?</h3>
+            <p>Our private student loans may help</p>
+            <a href="#" class="cta">Learn More</a>
+          </div>
+        </div>
+
+        <div class="slide" data-slide="1" role="group" aria-label="slide 2 of 2" style="background:linear-gradient(180deg,#6b6b6b,#474747);">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div class="icon">💳</div>
+            <h3>Protect your card</h3>
+            <p>Manage card controls & alerts</p>
+            <a href="#" class="cta">Details</a>
+          </div>
+        </div>
+
+        <div class="carousel-controls">
+          <button class="ctrl-btn" id="prevBtn" aria-label="previous slide"><i class="fas fa-chevron-left"></i></button>
+          <div style="flex:1"></div>
+          <div class="dots" id="carouselDots" aria-hidden="false">
+            <span class="dot-btn active" data-index="0"></span>
+            <span class="dot-btn" data-index="1"></span>
+          </div>
+          <button class="ctrl-btn" id="nextBtn" aria-label="next slide"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+    <div class="tx-card">
+      <h4>Recent Transactions</h4>
+      <table>
+        <thead><tr><th>Date</th><th>Type</th><th>Desc</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SEND -->
+  <section id="sendPage" class="page">
+    <div class="form-card">
+      <div class="field"><label>Recipient Name</label><input id="sendRecipient"/></div>
+      <div class="field"><label>Amount (USD)</label><input id="sendAmount" type="number"/></div>
+      <div class="field"><label>Note</label><input id="sendNote"/></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="navigateTo('dashboard')">Cancel</button>
+        <button class="btn" onclick="doSend()">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOSIT -->
+  <section id="depositPage" class="page">
+    <div class="form-card">
+      <div class="field"><label>Deposit Amount (USD)</label><input id="depositAmount" type="number"/></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="navigateTo('dashboard')">Cancel</button>
+        <button class="btn" onclick="doDeposit()">Deposit</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARD -->
+  <section id="cardPage" class="page">
+    <div class="form-card">
+      <div class="field"><label>Full Name</label><input id="cardName"/></div>
+      <div class="field"><label>ID Number</label><input id="cardId"/></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="navigateTo('dashboard')">Cancel</button>
+        <button class="btn" onclick="doCardRequest()">Request Card</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="menuOverlay"></div>
+<aside id="sideMenu" class="side-menu">
+  <button class="menu-close" onclick="toggleMenu(true)"><i class="fas fa-times"></i></button>
+  <h4>Menu</h4>
+  <ul class="menu-list">
+    <li onclick="navigateTo('dashboard');toggleMenu(true)">Accounts</li>
+    <li onclick="navigateTo('sendPage');toggleMenu(true)">Transfer & Pay</li>
+    <li onclick="navigateTo('depositPage');toggleMenu(true)">Deposit</li>
+    <li onclick="navigateTo('cardPage');toggleMenu(true)">Cards</li>
+    <li onclick="doLogout()">Logout</li>
+  </ul>
+</aside>
+
+<div id="notifWrap">
+  <button class="notif-close" onclick="hideNotification()">✕</button>
+  <div class="notif-inner" id="notifInner"></div>
+</div>
+<script>
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.dot-btn');
+let currentSlide = 0;
+
+// Show the slide at index
+function showSlide(index) {
+  slides.forEach((s, i) => {
+    s.classList.toggle('active', i === index);
+  });
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i === index);
+  });
+  currentSlide = index;
+}
+
+// Next/Prev
+document.getElementById('nextBtn').addEventListener('click', () => {
+  let next = currentSlide + 1;
+  if (next >= slides.length) next = 0;
+  showSlide(next);
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  let prev = currentSlide - 1;
+  if (prev < 0) prev = slides.length - 1;
+  showSlide(prev);
+});
+
+// Dots click
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const index = parseInt(dot.getAttribute('data-index'));
+    showSlide(index);
+  });
+});
+
+// Optional: Auto-slide every 5 seconds
+setInterval(() => {
+  let next = currentSlide + 1;
+  if (next >= slides.length) next = 0;
+  showSlide(next);
+}, 5000);
+</script>
+<script>
+const STORAGE_KEY = 'wellsGoData';
+let store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+  balance: 0, transactions: [], cardRequests: [], acctNumber: Math.floor(Math.random()*9000)+1000
+};
+saveStore();
+renderStore();
+
+function saveStore(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
+function navigateTo(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id)?.classList.add('active');toggleMenu(true);}
+function toggleMenu(close){ const m = document.getElementById('sideMenu'), o=document.getElementById('menuOverlay'); if(close){ m.classList.remove('open'); o.style.display='none'; }else{ m.classList.toggle('open'); o.style.display=m.classList.contains('open')?'block':'none';}}
+document.getElementById('menuBtn').addEventListener('click',()=>toggleMenu(false)); document.getElementById('menuOverlay').addEventListener('click',()=>toggleMenu(true));
+
+function formatMoney(n){return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function renderStore(){
+  document.getElementById('balanceAmount').textContent = formatMoney(store.balance);
+  document.getElementById('acctNumber').textContent = '...' + (store.acctNumber||'0000');
+  const txBody = document.getElementById('txBody');
+  txBody.innerHTML='';
+  const txs = (store.transactions||[]).slice().reverse();
+  if(!txs.length){ txBody.innerHTML='<tr><td colspan="4" style="color:#999">No recent transactions</td></tr>'; return; }
+  txs.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${t.date}</td><td>${t.type}</td><td>${t.desc}</td><td style="text-align:right">${formatMoney(t.amount)}</td>`; txBody.appendChild(tr); });
+}
+
+function showNotification(type,title,msg){ const w=document.getElementById('notifWrap'),i=document.getElementById('notifInner'); i.innerHTML=`<div class="notif-title"><span class="notif-icon">${type==='success'?'✓':type==='error'?'✕':'i'}</span><div>${title}</div></div><div class="notif-msg">${msg}</div>`; w.className=''; w.classList.add(type==='success'?'notif-success':type==='error'?'notif-error':'notif-info'); w.style.display='block'; setTimeout(()=>{w.style.display='none'},3000);}
+function hideNotification(){document.getElementById('notifWrap').style.display='none';}
+
+document.getElementById('iconSend').addEventListener('click',()=>navigateTo('sendPage'));
+document.getElementById('iconDeposit').addEventListener('click',()=>navigateTo('depositPage'));
+document.getElementById('iconATM').addEventListener('click',()=>navigateTo('cardPage'));
+
+function doSend(){
+  const name=document.getElementById('sendRecipient').value.trim();
+  const amt=parseFloat(document.getElementById('sendAmount').value);
+  const note=document.getElementById('sendNote').value.trim();
+  if(!name){showNotification('error','Missing recipient','Enter recipient');return;}
+  if(!amt || amt<=0){showNotification('error','Invalid amount','Amount must be >0');return;}
+  if(amt>store.balance){showNotification('error','Insufficient funds','You do not have enough balance');return;}
+
+  store.balance -= amt;
+  store.transactions.push({
+    date: new Date().toLocaleDateString(),
+    type: 'Send',
+    desc: `To ${name} ${note?'- '+note:''}`,
+    amount: amt
+  });
+  saveStore(); renderStore();
+  showNotification('success','Money Sent',`$${amt.toFixed(2)} sent to ${name}`);
+  navigateTo('dashboard');
+  document.getElementById('sendRecipient').value='';
+  document.getElementById('sendAmount').value='';
+  document.getElementById('sendNote').value='';
+}
+
+function doDeposit(){
+  const amt=parseFloat(document.getElementById('depositAmount').value);
+  if(!amt || amt<=0){showNotification('error','Invalid amount','Enter a valid deposit amount');return;}
+  store.balance += amt;
+  store.transactions.push({
+    date: new Date().toLocaleDateString(),
+    type: 'Deposit',
+    desc: 'Deposit funds',
+    amount: amt
+  });
+  saveStore(); renderStore();
+  showNotification('success','Deposit Successful',`$${amt.toFixed(2)} added to your account`);
+  navigateTo('dashboard');
+  document.getElementById('depositAmount').value='';
+}
+
+function doCardRequest(){
+  const name=document.getElementById('cardName').value.trim();
+  const id=document.getElementById('cardId').value.trim();
+  if(!name || !id){showNotification('error','Missing info','Enter all required fields');return;}
+  store.cardRequests.push({name,id,date:new Date().toLocaleDateString()});
+  saveStore();
+  showNotification('success','Card Requested','Your card request has been submitted');
+  navigateTo('dashboard');
+  document.getElementById('cardName').value='';
+  document.getElementById('cardId').value='';
+}
+
+function doLogout(){
+  if(confirm('Are you sure you want to logout?')){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+</script>
+<script>
+const USERS_KEY = 'wellsGoUsers_v1';
+let currentUser = JSON.parse(localStorage.getItem('wellsGoCurrentUser'));
+
+if(!currentUser){
+    alert('No logged-in user found. Redirecting to login.');
+    window.location='login.html';
+}
+
+function saveCurrentUser(){
+    // Save updated user back to users list
+    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    const index = users.findIndex(u => u.email === currentUser.email);
+    if(index !== -1) users[index] = currentUser;
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem('wellsGoCurrentUser', JSON.stringify(currentUser));
+}
+
+function formatMoney(n){ return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function renderDashboard(){
+    document.getElementById('balanceAmount').textContent = formatMoney(currentUser.balance || 0);
+    document.getElementById('acctNumber').textContent = '...' + (currentUser.acctNumber || '0000');
+
+    const txBody = document.getElementById('txBody');
+    txBody.innerHTML='';
+    const txs = (currentUser.transactions||[]).slice().reverse();
+    if(!txs.length){
+        txBody.innerHTML='<tr><td colspan="4" style="color:#999">No recent transactions</td></tr>';
+        return;
+    }
+    txs.forEach(t=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML=`<td>${t.date}</td><td>${t.type}</td><td>${t.desc}</td><td style="text-align:right">${formatMoney(t.amount)}</td>`;
+        txBody.appendChild(tr);
+    });
+}
+
+// Notifications
+function showNotification(type,title,msg){
+    const w=document.getElementById('notifWrap'),i=document.getElementById('notifInner');
+    i.innerHTML=`<div class="notif-title"><span class="notif-icon">${type==='success'?'✓':type==='error'?'✕':'i'}</span><div>${title}</div></div><div class="notif-msg">${msg}</div>`;
+    w.className=''; w.classList.add(type==='success'?'notif-success':type==='error'?'notif-error':'notif-info'); w.style.display='block';
+    setTimeout(()=>{ w.style.display='none'; },3000);
+}
+function hideNotification(){document.getElementById('notifWrap').style.display='none';}
+
+// Navigation and menu
+function navigateTo(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id)?.classList.add('active');toggleMenu(true);}
+function toggleMenu(close){ const m=document.getElementById('sideMenu'),o=document.getElementById('menuOverlay'); if(close){ m.classList.remove('open'); o.style.display='none'; }else{ m.classList.toggle('open'); o.style.display=m.classList.contains('open')?'block':'none';}}
+document.getElementById('menuBtn').addEventListener('click',()=>toggleMenu(false));
+document.getElementById('menuOverlay').addEventListener('click',()=>toggleMenu(true));
+
+// Actions
+document.getElementById('iconSend').addEventListener('click',()=>navigateTo('sendPage'));
+document.getElementById('iconDeposit').addEventListener('click',()=>navigateTo('depositPage'));
+document.getElementById('iconATM').addEventListener('click',()=>navigateTo('cardPage'));
+
+function doSend(){
+    const name=document.getElementById('sendRecipient').value.trim();
+    const amt=parseFloat(document.getElementById('sendAmount').value);
+    const note=document.getElementById('sendNote').value.trim();
+    if(!name){showNotification('error','Missing recipient','Enter recipient'); return;}
+    if(!amt || amt<=0){showNotification('error','Invalid amount','Amount must be >0'); return;}
+    if(amt>currentUser.balance){showNotification('error','Insufficient funds','You do not have enough balance'); return;}
+
+    currentUser.balance -= amt;
+    currentUser.transactions.push({ date: new Date().toLocaleDateString(), type: 'Send', desc: `To ${name} ${note?'- '+note:''}`, amount: amt });
+    saveCurrentUser(); renderDashboard();
+    showNotification('success','Money Sent',`$${amt.toFixed(2)} sent to ${name}`);
+    navigateTo('dashboard');
+    document.getElementById('sendRecipient').value='';
+    document.getElementById('sendAmount').value='';
+    document.getElementById('sendNote').value='';
+}
+
+function doDeposit(){
+    const amt=parseFloat(document.getElementById('depositAmount').value);
+    if(!amt || amt<=0){showNotification('error','Invalid amount','Enter a valid deposit amount'); return;}
+    currentUser.balance += amt;
+    currentUser.transactions.push({ date: new Date().toLocaleDateString(), type: 'Deposit', desc: 'Deposit funds', amount: amt });
+    saveCurrentUser(); renderDashboard();
+    showNotification('success','Deposit Successful',`$${amt.toFixed(2)} added to your account`);
+    navigateTo('dashboard');
+    document.getElementById('depositAmount').value='';
+}
+
+function doCardRequest(){
+    const name=document.getElementById('cardName').value.trim();
+    const id=document.getElementById('cardId').value.trim();
+    if(!name || !id){showNotification('error','Missing info','Enter all required fields');return;}
+    currentUser.cardRequests = currentUser.cardRequests || [];
+    currentUser.cardRequests.push({name,id,date:new Date().toLocaleDateString()});
+    saveCurrentUser();
+    showNotification('success','Card Requested','Your card request has been submitted');
+    navigateTo('dashboard');
+    document.getElementById('cardName').value='';
+    document.getElementById('cardId').value='';
+}
+
+function doLogout(){
+    if(confirm('Are you sure you want to logout?')){
+        localStorage.removeItem('wellsGoCurrentUser');
+        window.location='login.html';
+    }
+}
+
+// Initial render
+renderDashboard();
+</script>
+</body>
+</html>

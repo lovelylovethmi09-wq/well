@@ -1,0 +1,106 @@
+:root{
+  --bg:#fff;
+  --card:#fff;
+  --muted:#6b6b6b;
+  --primary:#c42a2a; /* bold red but original */
+  --accent:#f2b237;  /* warm accent */
+  --text:#111;
+  --shadow: 0 8px 24px rgba(16,16,16,0.08);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+:root.dark{
+  --bg:#0b0b0c;
+  --card:#0f1113;
+  --muted:#9aa0a6;
+  --text:#e6eef8;
+  --shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#fff 0%, #fafafa 100%);
+  color:var(--text);
+  background-color:var(--bg);
+  min-height:100vh;
+}
+
+/* Topbar */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 18px;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  background:var(--bg);
+}
+.brand-mini .logo.small{font-weight:700; font-size:18px}
+.logo{font-weight:700; font-size:22px}
+.logo .accent{color:var(--accent)}
+.tag{color:var(--muted); font-size:13px}
+
+/* Layout */
+.layout{
+  display:flex;
+  gap:18px;
+  padding:18px;
+  align-items:flex-start;
+}
+.sidebar{width:260px; padding:16px;}
+.main{flex:1; padding:16px; min-height:72vh}
+
+/* Cards */
+.card{
+  background:var(--card);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:18px;
+}
+
+/* Auth page */
+.auth-page{max-width:420px;margin:42px auto;padding:18px}
+.auth-page .brand{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:12px}
+.auth-page .card{padding:18px}
+label{display:block;margin-bottom:10px;font-size:13px}
+input[type="text"],input[type="password"],input[type="email"],input[type="tel"],input[type="number"],input[type="file"]{
+  width:100%; padding:10px;border-radius:8px;border:1px solid #e6e6e6;font-size:14px;background:transparent;
+}
+
+/* Buttons */
+.btn{
+  padding:10px 14px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600;
+}
+.btn.primary{background:var(--primary);color:white;border-color:rgba(0,0,0,0.05)}
+.btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+.btn.small{padding:6px 8px}
+
+/* Profile */
+.profile{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.profile img{width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid rgba(0,0,0,0.04)}
+.bold{font-weight:700}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+
+/* Nav */
+.nav{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.nav-btn{background:transparent;border:0;padding:10px;text-align:left;border-radius:8px;cursor:pointer}
+.nav-btn.active{background:linear-gradient(90deg,rgba(196,42,42,0.05),transparent);border-left:4px solid var(--primary)}
+
+/* Balance */
+.balance-card{display:flex;justify-content:space-between;align-items:center;padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(196,42,42,0.04), rgba(242,178,55,0.02));margin-bottom:16px}
+.big{font-size:28px}
+.tx-list{list-style:none;margin:0;padding:0}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px dashed rgba(0,0,0,0.03)}
+.tx-pos{color:green}
+.tx-neg{color:crimson}
+
+/* Forms and small helpers */
+.form-grid{display:grid;gap:10px;max-width:480px}
+.form-actions{margin-top:8px}
+
+/* small responsive */
+@media (max-width:900px){
+  .layout{flex-direction:column;padding:12px}
+  .sidebar{width:100%}
+  .auth-page{margin:22px 12px}
+}
